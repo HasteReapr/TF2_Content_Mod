@@ -1,0 +1,3 @@
+displayName = Terraria Fortress 2
+author = HasteReapr
+version = 0.01
