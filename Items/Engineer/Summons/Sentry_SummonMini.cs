@@ -60,9 +60,9 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
-            Texture2D LegTexture = mod.GetTexture("TF2_Content/Items/Engineer/Summons/SentryGun_lvl_1_Legs");
+            Texture2D LegTexture = mod.GetTexture("Items/Engineer/Summons/SentryGun_lvl_1_Legs");
             spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 10) - Main.screenPosition, Color.White);
-            Texture2D HealthTexture = mod.GetTexture("TF2_Content/Items/Engineer/Summons/SentryHealthBar");
+            Texture2D HealthTexture = mod.GetTexture("Items/Engineer/Summons/SentryHealthBar");
             gradientA = new Color(0, 127, 14); //Darker goes here
             gradientB = new Color(0, 124, 20); //Lighter goes here
             if (sentryHitPoints < maxHitPoints || healthBarTimer >= 0)

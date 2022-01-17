@@ -34,6 +34,7 @@ namespace TF2_Content.Items.Engineer.Summons
             item.value = Item.sellPrice(gold: 30);
             item.rare = ItemRarityID.Cyan;
             item.UseSound = SoundID.Item44;
+            item.knockBack = 10f;
 
             item.noMelee = true;
             item.summon = true;

@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.ID;
 using TF2_Content.Buffs;
+using TF2_Content.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -62,9 +63,9 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
-            Texture2D LegTexture = mod.GetTexture("TF2_Content/Items/Engineer/Summons/SentryGun_lvl_1_Legs");
+            Texture2D LegTexture = mod.GetTexture("Items/Engineer/Summons/SentryGun_lvl_1_Legs");
             spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 10) - Main.screenPosition, Color.White);
-            Texture2D HealthTexture = mod.GetTexture("TF2_Content/Items/Engineer/Summons/SentryHealthBar");
+            Texture2D HealthTexture = mod.GetTexture("Items/Engineer/Summons/SentryHealthBar");
             gradientA = new Color(0, 127, 14); //Darker goes here
             gradientB = new Color(0, 124, 20); //Lighter goes here
             if (sentryHitPoints < maxHitPoints || healthBarTimer >= 0)
@@ -92,6 +93,7 @@ namespace TF2_Content.Items.Engineer.Summons
         }
 
         int shotTimer = 8;
+        int spawnAmmo = 100;
         int rocketTimer = 120;
         int inBetweenRocket = 15;
         int rockets = 4;
@@ -151,6 +153,9 @@ namespace TF2_Content.Items.Engineer.Summons
                 healthBarTimer--;
             }
 
+            //this bit of code is supposed to handle when the player right clicks on the sentry gun.
+            ChestCheck();
+
             // the rest of the code handles the shooting part of the sentry gun
             SearchForTargets();
             if (foundTarget)
@@ -169,11 +174,27 @@ namespace TF2_Content.Items.Engineer.Summons
                 buffAmmount += 1;
             }
 
-            if(buffAmmount >= 3)
+            if (buffAmmount >= 3)
             {
                 buffAmmount = 3;
             }
         }
+
+        private void ChestCheck()
+        {
+            // check if Main.mouseRight and Main.mouseRightRelease and projectile.Hitbox.Contains(Main.MouseWorld)
+            if (Main.mouseRight && Main.mouseRightRelease && projectile.Hitbox.Contains(Main.MouseWorld.ToPoint()))
+            {
+                SentryUI.Visible = true;
+            }
+        }
+
+        int DefaultProjType = ModContent.ProjectileType<Sentry_Bullet>();
+        Item ProjType;
+        public Item bulletSlot1 => ModContent.GetInstance<TF2_Content>().SentryUI._vanillaItemSlot1.Item;
+        public Item bulletSlot2 => ModContent.GetInstance<TF2_Content>().SentryUI._vanillaItemSlot2.Item;
+        public Item bulletSlot3 => ModContent.GetInstance<TF2_Content>().SentryUI._vanillaItemSlot3.Item;
+        public Item bulletSlot4 => ModContent.GetInstance<TF2_Content>().SentryUI._vanillaItemSlot4.Item;
 
         private void Shoot()
         {
@@ -181,8 +202,8 @@ namespace TF2_Content.Items.Engineer.Summons
             rocketTimer--;
             Vector2 direction = targetCenter - projectile.Center;
             float speed = 32;
-            float damageMod = 1 + buffAmmount * 0.1f;
             direction.Normalize();
+            projectile.rotation = direction.ToRotation() + (projectile.spriteDirection == 1 ? 0f : MathHelper.Pi);
             if (targetCenter.X < projectile.Center.X)
             {
                 projectile.spriteDirection = -1;
@@ -193,11 +214,53 @@ namespace TF2_Content.Items.Engineer.Summons
                 projectile.spriteDirection = 1;
                 drawOffsetX = 0;
             }
-            projectile.rotation = direction.ToRotation() + (projectile.spriteDirection == 1 ? 0f : MathHelper.Pi);
+            if (!bulletSlot1.IsAir)
+            {
+                ProjType = bulletSlot1;
+            }
+            else if (!bulletSlot2.IsAir)
+            {
+                ProjType = bulletSlot2;
+            }
+            else if (!bulletSlot3.IsAir)
+            {
+                ProjType = bulletSlot3;
+            }
+            else if (!bulletSlot4.IsAir)
+            {
+                ProjType = bulletSlot4;
+            }
+            else
+            {
+                if (shotTimer <= 0 && spawnAmmo > 0)
+                {
+                    Projectile.NewProjectile(projectile.Center, direction * speed, DefaultProjType, 300, projectile.knockBack, projectile.owner);
+                    Main.PlaySound(SoundID.Item11, projectile.Center);
+                    spawnAmmo--;
+                    shotTimer = 8;
+                }
+                else if (shotTimer <= 0)
+                {
+                    Main.PlaySound(SoundID.Item11, projectile.Center);
+                    shotTimer = 8;
+                }
+            }
+
             if (shotTimer <= 0)
             {
-                Projectile.NewProjectile(projectile.Center, direction * speed, ModContent.ProjectileType<Sentry_Bullet>(), (int)(300 * damageMod), projectile.knockBack, projectile.owner);
+                if (ProjType.type == ItemID.MusketBall || ProjType.type == ItemID.EndlessMusketPouch)
+                {
+                    Projectile.NewProjectile(projectile.Center, direction * speed, DefaultProjType, 300, projectile.knockBack, projectile.owner);
+                }
+                else
+                {
+                    Projectile.NewProjectile(projectile.Center, direction * speed, ProjType.shoot, 300, projectile.knockBack, projectile.owner);
+                }
                 Main.PlaySound(SoundID.Item11, projectile.Center);
+                if (ProjType.type != ItemID.EndlessMusketPouch)
+                {
+                    ProjType.stack--;
+                }
                 shotTimer = 8;
             }
 
@@ -206,7 +269,7 @@ namespace TF2_Content.Items.Engineer.Summons
                 inBetweenRocket--;
                 if (inBetweenRocket <= 0)
                 {
-                    Projectile.NewProjectile(projectile.Center, direction * 16, ModContent.ProjectileType<Sentry_Missile>(), (int)(300 * damageMod), projectile.knockBack, projectile.owner);
+                    Projectile.NewProjectile(projectile.Center, direction * 16, ModContent.ProjectileType<Sentry_Missile>(), 300, projectile.knockBack, projectile.owner);
                     Main.PlaySound(SoundID.Item61, projectile.Center);
                     rockets--;
                     inBetweenRocket = 5;
@@ -273,6 +336,23 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override void Kill(int timeLeft)
         {
+            SentryUI.Visible = false;
+            if (!bulletSlot1.IsAir)
+            {
+                Item.NewItem(projectile.Center, bulletSlot1.type, bulletSlot1.stack);
+            }
+            if (!bulletSlot2.IsAir)
+            {
+                Item.NewItem(projectile.Center, bulletSlot2.type, bulletSlot2.stack);
+            }
+            if (!bulletSlot3.IsAir)
+            {
+                Item.NewItem(projectile.Center, bulletSlot3.type, bulletSlot3.stack);
+            }
+            if (!bulletSlot4.IsAir)
+            {
+                Item.NewItem(projectile.Center, bulletSlot4.type, bulletSlot4.stack);
+            }
             Main.PlaySound(SoundID.Item14, projectile.position);
             // Smoke Dust spawn
             for (int i = 0; i < 50; i++)
