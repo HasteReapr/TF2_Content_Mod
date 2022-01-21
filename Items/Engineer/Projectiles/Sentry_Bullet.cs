@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace TF2_Content.Items.Engineer.Summons
+namespace TF2_Content.Items.Engineer.Projectiles
 {
     class Sentry_Bullet : ModProjectile
     {

@@ -1,6 +1,6 @@
 ﻿using Terraria.ID;
 using Terraria.ModLoader;
-using TF2_Content.Items.Engineer.Summons;
+using TF2_Content.Items.Engineer.Projectiles;
 using Microsoft.Xna.Framework;
 
 namespace TF2_Content.Items.Soldier

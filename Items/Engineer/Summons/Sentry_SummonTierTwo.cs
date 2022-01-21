@@ -6,6 +6,7 @@ using TF2_Content.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
+using TF2_Content.Items.Engineer.Projectiles;
 
 namespace TF2_Content.Items.Engineer.Summons
 {
@@ -51,9 +52,10 @@ namespace TF2_Content.Items.Engineer.Summons
 
         int sentryHitPoints = 100;
         static int maxHitPoints = 1000;
-        int healTimer = 60;
+        int healTimer = 30;
         int healAmount = 50;
         int healthBarTimer = 60;
+        int invulnFrames = 0;
         private Color gradientA;
         private Color gradientB;
 
@@ -61,7 +63,7 @@ namespace TF2_Content.Items.Engineer.Summons
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
             Texture2D LegTexture = mod.GetTexture("Items/Engineer/Summons/SentryGun_lvl_1_Legs");
-            spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 10) - Main.screenPosition, Color.White);
+            spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 4) - Main.screenPosition, Color.White);
             Texture2D HealthTexture = mod.GetTexture("Items/Engineer/Summons/SentryHealthBar");
             gradientA = new Color(0, 127, 14); //Darker goes here
             gradientB = new Color(0, 124, 20); //Lighter goes here
@@ -94,6 +96,19 @@ namespace TF2_Content.Items.Engineer.Summons
         {
             sentryHitPoints -= target.damage;
             healthBarTimer = 60;
+            invulnFrames = 15;
+        }
+
+        public override bool? CanHitNPC(NPC target)
+        {
+            if (invulnFrames <= 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         int shotTimer = 8;
@@ -102,6 +117,16 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override void AI()
         {
+            Player player = Main.player[projectile.owner];
+            if (player.whoAmI == Main.myPlayer)
+            {
+                var modPlayer = Main.LocalPlayer.GetModPlayer<TF2_Player>();
+                modPlayer.SentryHealth = sentryHitPoints;
+                modPlayer.SentryHealthMax = maxHitPoints;
+                modPlayer.SentrySpawnAmmo = 100;
+                modPlayer.SentryCurrentAmmo = spawnAmmo;
+            }
+            invulnFrames--;
             if (Collision.SolidCollision(projectile.position + new Vector2(0, 22), projectile.width, projectile.height))
             {
                 projectile.velocity = Vector2.Zero;
@@ -113,7 +138,6 @@ namespace TF2_Content.Items.Engineer.Summons
             }
 
             // This is supposed to keep the minion from dying instantly if you have the buff
-            Player player = Main.player[projectile.owner];
             if (player.dead || !player.active)
             {
                 player.ClearBuff(ModContent.BuffType<Sentry_Buff>());
@@ -135,25 +159,7 @@ namespace TF2_Content.Items.Engineer.Summons
             Main.player[projectile.owner].tankPetReset = false;
 
             //this code handles the hitpoint system, if the projectile's health goes below zero it dies, it also has a healing timer.
-            if (sentryHitPoints <= 0)
-            {
-                projectile.Kill();
-            }
-            if (sentryHitPoints < maxHitPoints)
-            {
-                healTimer--;
-            }
-            if (healTimer <= 0)
-            {
-                sentryHitPoints += healAmount;
-                healTimer = 60;
-            }
-            if (sentryHitPoints > maxHitPoints || sentryHitPoints == maxHitPoints)
-            {
-                sentryHitPoints = maxHitPoints;
-                healTimer = 60;
-                healthBarTimer--;
-            }
+            healSentry();
 
             //this bit of code is supposed to handle when the player right clicks on the sentry gun.
             ChestCheck();
@@ -166,9 +172,32 @@ namespace TF2_Content.Items.Engineer.Summons
             }
         }
 
+        private void healSentry()
+        {
+            if (sentryHitPoints <= 0)
+            {
+                projectile.Kill();
+            }
+            if (sentryHitPoints < maxHitPoints && invulnFrames <= 0)
+            {
+                healTimer--;
+            }
+            if (healTimer <= 0)
+            {
+                sentryHitPoints += healAmount;
+                healTimer = 30;
+            }
+            if (sentryHitPoints > maxHitPoints || sentryHitPoints == maxHitPoints)
+            {
+                sentryHitPoints = maxHitPoints;
+                healTimer = 30;
+                healthBarTimer--;
+            }
+        }
         private void ChestCheck()
         {
-            if (Main.mouseRight && Main.mouseRightRelease && projectile.Hitbox.Contains(Main.MouseWorld.ToPoint()))
+            Player player = new Player();
+            if (Main.mouseRight && Main.mouseRightRelease && projectile.Hitbox.Contains(Main.MouseWorld.ToPoint()) && player.whoAmI == Main.myPlayer)
             {
                 SentryUI s = new SentryUI();
                 SentryUI.Visible = true;
@@ -305,26 +334,30 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override void Kill(int timeLeft)
         {
-            SentryUI.Visible = false;
-            if (!bulletSlot1.IsAir && !tierUpgrade)
+            Player player = Main.player[projectile.owner];
+            if (player.whoAmI == Main.myPlayer)
             {
-                Item.NewItem(projectile.Center, bulletSlot1.type, bulletSlot1.stack);
-                bulletSlot1.stack = 0;
-            }
-            if (!bulletSlot2.IsAir && !tierUpgrade)
-            {
-                Item.NewItem(projectile.Center, bulletSlot2.type, bulletSlot2.stack);
-                bulletSlot2.stack = 0;
-            }
-            if (!bulletSlot3.IsAir && !tierUpgrade)
-            {
-                Item.NewItem(projectile.Center, bulletSlot3.type, bulletSlot3.stack);
-                bulletSlot3.stack = 0;
-            }
-            if (!bulletSlot4.IsAir && !tierUpgrade)
-            {
-                Item.NewItem(projectile.Center, bulletSlot4.type, bulletSlot4.stack);
-                bulletSlot4.stack = 0;
+                SentryUI.Visible = false;
+                if (!bulletSlot1.IsAir && !tierUpgrade)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot1.type, bulletSlot1.stack);
+                    bulletSlot1.stack = 0;
+                }
+                if (!bulletSlot2.IsAir && !tierUpgrade)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot2.type, bulletSlot2.stack);
+                    bulletSlot2.stack = 0;
+                }
+                if (!bulletSlot3.IsAir && !tierUpgrade)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot3.type, bulletSlot3.stack);
+                    bulletSlot3.stack = 0;
+                }
+                if (!bulletSlot4.IsAir && !tierUpgrade)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot4.type, bulletSlot4.stack);
+                    bulletSlot4.stack = 0;
+                }
             }
             Main.PlaySound(SoundID.Item14, projectile.position);
             // Smoke Dust spawn

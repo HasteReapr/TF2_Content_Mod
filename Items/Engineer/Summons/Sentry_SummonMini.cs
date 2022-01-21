@@ -4,6 +4,7 @@ using Terraria.ID;
 using TF2_Content.Buffs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using TF2_Content.Items.Engineer.Projectiles;
 
 namespace TF2_Content.Items.Engineer.Summons
 {

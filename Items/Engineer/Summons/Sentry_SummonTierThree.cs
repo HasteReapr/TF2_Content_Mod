@@ -5,21 +5,21 @@ using TF2_Content.Buffs;
 using TF2_Content.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using TF2_Content.Items.Engineer.Projectiles;
 
 namespace TF2_Content.Items.Engineer.Summons
 {
     class Sentry_SummonTierThree : ModProjectile
     {
         string TextureString = "TF2_Content/Items/Engineer/Summons/SentryGun_lvl_3_head";
-        // this was supposed to be used to change the texture between tiers but i figured out it would be easier to just kinda
-        // make three seperate projectiles for each tier and im too lazy to change it back lol.
         public override string Texture => TextureString;
         public override void SetStaticDefaults()
         {
             Main.projFrames[projectile.type] = 2;
             DisplayName.SetDefault("Sentry Gun");
             Main.projPet[projectile.type] = true;
-            ProjectileID.Sets.MinionSacrificable[projectile.type] = true;
+            ProjectileID.Sets.MinionSacrificable[projectile.type] = false;
             ProjectileID.Sets.Homing[projectile.type] = true;
         }
 
@@ -55,6 +55,7 @@ namespace TF2_Content.Items.Engineer.Summons
         int sentryHitPoints = 100;
         static int maxHitPoints = 1500;
         int healTimer = 60;
+        int healTime = 30;
         int healAmount = 50;
         int healthBarTimer = 60;
         private Color gradientA;
@@ -64,7 +65,7 @@ namespace TF2_Content.Items.Engineer.Summons
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
             Texture2D LegTexture = mod.GetTexture("Items/Engineer/Summons/SentryGun_lvl_1_Legs");
-            spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 10) - Main.screenPosition, Color.White);
+            spriteBatch.Draw(LegTexture, projectile.Center + new Vector2(-24, 4) - Main.screenPosition, Color.White);
             Texture2D HealthTexture = mod.GetTexture("Items/Engineer/Summons/SentryHealthBar");
             gradientA = new Color(0, 127, 14); //Darker goes here
             gradientB = new Color(0, 124, 20); //Lighter goes here
@@ -98,15 +99,39 @@ namespace TF2_Content.Items.Engineer.Summons
         int inBetweenRocket = 15;
         int rockets = 4;
         int buffAmmount = 0;
+        int invulnFrames = 0;
         public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
         {
             sentryHitPoints -= (int)(target.damage * (buffAmmount * 0.05f));
             healthBarTimer = 60;
+            invulnFrames = 15;
+        }
+
+        public override bool? CanHitNPC(NPC target)
+        {
+            if (invulnFrames <= 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 
         public override void AI()
         {
+            Player player = Main.player[projectile.owner];
+            if (player.whoAmI == Main.myPlayer)
+            {
+                var modPlayer = Main.LocalPlayer.GetModPlayer<TF2_Player>();
+                modPlayer.SentryHealth = sentryHitPoints;
+                modPlayer.SentryHealthMax = maxHitPoints;
+                modPlayer.SentrySpawnAmmo = 100;
+                modPlayer.SentryCurrentAmmo = spawnAmmo;
+            }
+            invulnFrames--;
             if (Collision.SolidCollision(projectile.position + new Vector2(0, 22), projectile.width, projectile.height))
             {
                 projectile.velocity = Vector2.Zero;
@@ -118,7 +143,6 @@ namespace TF2_Content.Items.Engineer.Summons
             }
 
             // This is supposed to keep the minion from dying instantly if you have the buff
-            Player player = Main.player[projectile.owner];
             if (player.dead || !player.active)
             {
                 player.ClearBuff(ModContent.BuffType<Sentry_Buff>());
@@ -133,25 +157,7 @@ namespace TF2_Content.Items.Engineer.Summons
             Main.player[projectile.owner].tankPetReset = false;
 
             //this code handles the hitpoint system, if the projectile's health goes below zero it dies, it also has a healing timer.
-            if (sentryHitPoints <= 0)
-            {
-                projectile.Kill();
-            }
-            if (sentryHitPoints < maxHitPoints)
-            {
-                healTimer--;
-            }
-            if (healTimer <= 0)
-            {
-                sentryHitPoints += healAmount;
-                healTimer = 60;
-            }
-            if (sentryHitPoints > maxHitPoints || sentryHitPoints == maxHitPoints)
-            {
-                sentryHitPoints = maxHitPoints;
-                healTimer = 60;
-                healthBarTimer--;
-            }
+            healSentry();
 
             //this bit of code is supposed to handle when the player right clicks on the sentry gun.
             ChestCheck();
@@ -166,24 +172,54 @@ namespace TF2_Content.Items.Engineer.Summons
             BuffSentry();
         }
 
+        private void healSentry()
+        {
+            if (sentryHitPoints <= 0)
+            {
+                projectile.Kill();
+            }
+            if (sentryHitPoints < maxHitPoints)
+            {
+                healTimer--;
+            }
+            if (healTimer <= 0)
+            {
+                sentryHitPoints += healAmount;
+                healTimer = healTime;
+            }
+            if (sentryHitPoints > maxHitPoints || sentryHitPoints == maxHitPoints)
+            {
+                sentryHitPoints = maxHitPoints;
+                healTimer = healTime;
+                healthBarTimer--;
+            }
+        }
+        int projDamage = 300;
+        int shotTime = 8;
         private void BuffSentry()
         {
             Player player = Main.player[projectile.owner];
             if (player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree_Buff>()] > 0)
             {
-                buffAmmount += 1;
+                buffAmmount = player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree_Buff>()];
+                maxHitPoints = (int)(1500 * (1 + (buffAmmount * 0.1f)));
+                projDamage = (int)(300 * (1 + (buffAmmount * 0.25f)));
             }
-
-            if (buffAmmount >= 3)
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree_Buff>()] >= 4)
             {
-                buffAmmount = 3;
+                shotTime = 4;
+                healTime = 15;
+            }
+            else if(player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree_Buff>()] >= 6)
+            {
+                shotTime = 2;
             }
         }
 
         private void ChestCheck()
         {
-            // check if Main.mouseRight and Main.mouseRightRelease and projectile.Hitbox.Contains(Main.MouseWorld)
-            if (Main.mouseRight && Main.mouseRightRelease && projectile.Hitbox.Contains(Main.MouseWorld.ToPoint()))
+            Player player = new Player();
+            if (Main.mouseRight && Main.mouseRightRelease && projectile.Hitbox.Contains(Main.MouseWorld.ToPoint()) && player.whoAmI == Main.myPlayer)
             {
                 SentryUI.Visible = true;
             }
@@ -234,15 +270,15 @@ namespace TF2_Content.Items.Engineer.Summons
             {
                 if (shotTimer <= 0 && spawnAmmo > 0)
                 {
-                    Projectile.NewProjectile(projectile.Center, direction * speed, DefaultProjType, 300, projectile.knockBack, projectile.owner);
+                    Projectile.NewProjectile(projectile.Center, direction * speed, DefaultProjType, projDamage, projectile.knockBack, projectile.owner);
                     Main.PlaySound(SoundID.Item11, projectile.Center);
                     spawnAmmo--;
-                    shotTimer = 8;
+                    shotTimer = shotTime;
                 }
                 else if (shotTimer <= 0)
                 {
                     Main.PlaySound(SoundID.Item11, projectile.Center);
-                    shotTimer = 8;
+                    shotTimer = shotTime;
                 }
             }
 
@@ -261,7 +297,7 @@ namespace TF2_Content.Items.Engineer.Summons
                 {
                     ProjType.stack--;
                 }
-                shotTimer = 8;
+                shotTimer = shotTime;
             }
 
             if (rocketTimer <= 0)
@@ -336,22 +372,30 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override void Kill(int timeLeft)
         {
-            SentryUI.Visible = false;
-            if (!bulletSlot1.IsAir)
+            Player player = Main.player[projectile.owner];
+            if (player.whoAmI == Main.myPlayer)
             {
-                Item.NewItem(projectile.Center, bulletSlot1.type, bulletSlot1.stack);
-            }
-            if (!bulletSlot2.IsAir)
-            {
-                Item.NewItem(projectile.Center, bulletSlot2.type, bulletSlot2.stack);
-            }
-            if (!bulletSlot3.IsAir)
-            {
-                Item.NewItem(projectile.Center, bulletSlot3.type, bulletSlot3.stack);
-            }
-            if (!bulletSlot4.IsAir)
-            {
-                Item.NewItem(projectile.Center, bulletSlot4.type, bulletSlot4.stack);
+                SentryUI.Visible = false;
+                if (!bulletSlot1.IsAir)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot1.type, bulletSlot1.stack);
+                    bulletSlot1.stack = 0;
+                }
+                if (!bulletSlot2.IsAir)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot2.type, bulletSlot2.stack);
+                    bulletSlot2.stack = 0;
+                }
+                if (!bulletSlot3.IsAir)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot3.type, bulletSlot3.stack);
+                    bulletSlot3.stack = 0;
+                }
+                if (!bulletSlot4.IsAir)
+                {
+                    Item.NewItem(projectile.Center, bulletSlot4.type, bulletSlot4.stack);
+                    bulletSlot4.stack = 0;
+                }
             }
             Main.PlaySound(SoundID.Item14, projectile.position);
             // Smoke Dust spawn
@@ -401,7 +445,12 @@ namespace TF2_Content.Items.Engineer.Summons
 
     class Sentry_SummonTierThree_Buff : ModProjectile
     {
-        public override string Texture => "TF2_Content/Items/empty";
+        public override void SetStaticDefaults()
+        {
+            Main.projFrames[projectile.type] = 4;
+            Main.projPet[projectile.type] = true;
+            ProjectileID.Sets.MinionSacrificable[projectile.type] = true;
+        }
 
         public override void SetDefaults()
         {
@@ -409,12 +458,19 @@ namespace TF2_Content.Items.Engineer.Summons
             projectile.width = 4;
             projectile.height = 4;
             projectile.timeLeft = 5;
+            projectile.minion = true;
             projectile.minionSlots = 1f;
-            ProjectileID.Sets.MinionSacrificable[projectile.type] = true;
+        }
+
+        public override bool MinionContactDamage()
+        {
+            return true;
         }
 
         public override void AI()
         {
+            // this bit here is the alive conditions, if the player is dead, or has the buff, or the level 3 sentry doesnt exist
+            #region lifeConditions
             Player player = Main.player[projectile.owner];
             if (player.dead || !player.active)
             {
@@ -424,6 +480,81 @@ namespace TF2_Content.Items.Engineer.Summons
             {
                 projectile.timeLeft = 2;
             }
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree>()] < 1)
+            {
+                projectile.Kill();
+            }
+            #endregion
+
+            //this code is supposed to make the projectile follow behind the player
+            #region idleMovement
+            Vector2 idlePosition = player.Center;
+            idlePosition.Y -= 48f;
+            float minionPositionOffsetX = (10 + projectile.minionPos * 40) * -player.direction;
+            idlePosition.X += minionPositionOffsetX;
+            float speed = 8f;
+            float inertia = 20f;
+            Vector2 vectorToIdlePosition = idlePosition - projectile.Center;
+            float distanceToIdlePosition = vectorToIdlePosition.Length();
+            if (Main.myPlayer == player.whoAmI && distanceToIdlePosition > 2000f)
+            {
+                projectile.position = idlePosition;
+                projectile.velocity *= 0.1f;
+                projectile.netUpdate = true;
+            }
+
+            float overlapVelocity = 0.04f;
+            for (int i = 0; i < Main.maxProjectiles; i++)
+            {
+                Projectile other = Main.projectile[i];
+                if (i != projectile.whoAmI && other.active && other.owner == projectile.owner && Math.Abs(projectile.position.X - other.position.X) + Math.Abs(projectile.position.Y - other.position.Y) < projectile.width)
+                {
+                    if (projectile.position.X < other.position.X) projectile.velocity.X -= overlapVelocity;
+                    else projectile.velocity.X += overlapVelocity;
+
+                    if (projectile.position.Y < other.position.Y) projectile.velocity.Y -= overlapVelocity;
+                    else projectile.velocity.Y += overlapVelocity;
+                }
+            }
+
+            if (distanceToIdlePosition > 600f)
+            {
+                speed = 12f;
+                inertia = 60f;
+            }
+            else
+            {
+                speed = 4f;
+                inertia = 80f;
+            }
+            if (distanceToIdlePosition > 20f)
+            {
+                vectorToIdlePosition.Normalize();
+                vectorToIdlePosition *= speed;
+                projectile.velocity = (projectile.velocity * (inertia - 1) + vectorToIdlePosition) / inertia;
+            }
+            else if (projectile.velocity == Vector2.Zero)
+            {
+                projectile.velocity.X = -0.15f;
+                projectile.velocity.Y = -0.05f;
+            }
+
+            #endregion
+
+            //animation
+            if (++projectile.frameCounter >= 4)
+            {
+                if (++projectile.frame >= 4)
+                {
+                    projectile.frame = 0;
+                }
+                projectile.frameCounter = 0;
+            }
+        }
+
+        public override void Kill(int timeLeft)
+        {
+            Gore.NewGore(projectile.Center, new Vector2(0, 4), mod.GetGoreSlot("Gores/Sentry_Drone_Gore"), projectile.scale);
         }
     }
 }

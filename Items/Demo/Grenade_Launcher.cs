@@ -1,6 +1,7 @@
 ﻿using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
+using TF2_Content.Items.Demo.Projectiles;
 
 namespace TF2_Content.Items.Demo
 {
@@ -17,9 +18,10 @@ namespace TF2_Content.Items.Demo
             item.damage = 300;
             item.useStyle = ItemUseStyleID.HoldingOut;
             item.shoot = ModContent.ProjectileType<Grenade_Pill>();
-            item.shootSpeed = 12;
+            item.shootSpeed = 16;
             item.useTime = 20;
             item.useAnimation = 20;
+            item.autoReuse = true;
         }
 
         public override Vector2? HoldoutOffset()

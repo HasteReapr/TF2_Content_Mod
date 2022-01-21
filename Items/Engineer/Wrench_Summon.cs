@@ -3,9 +3,9 @@ using Terraria;
 using Terraria.ID;
 using TF2_Content.Buffs;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using TF2_Content.Items.Engineer.Summons;
 
-namespace TF2_Content.Items.Engineer.Summons
+namespace TF2_Content.Items.Engineer
 {
     class Wrench_Summon : ModItem
     {
@@ -13,13 +13,10 @@ namespace TF2_Content.Items.Engineer.Summons
         {
             DisplayName.SetDefault("Engineering Wrench");
             Tooltip.SetDefault("Summons a sentry that levels up the more you summon." +
-                "\nUse right click to toggle between buffing or mini sentries." +
-                "\n1 Summon = Level 1 Sentry" +
-                "\n2 Summons = Level 2 Sentry" +
-                "\n3 Summons = Level 3 Sentry" +
-                "\n>3 Buff Sentry or Summon Mini Sentries" +
+                "\nSentries spawn with 100 reserve ammo. Level 3 rockets need no ammo." +
+                "\nAfter level 3, summoning spawns sentry drones which buff the sentry gun." +
                 "\nEach buff increases defense, damage and firing speed." +
-                "\nUse alt fire to summon mini sentries.");
+                "\nRight click on the sentry gun to open the sentry inventory.");
         }
 
         public override void SetDefaults()
@@ -41,10 +38,6 @@ namespace TF2_Content.Items.Engineer.Summons
             item.buffType = ModContent.BuffType<Sentry_Buff>();
             item.shoot = ModContent.ProjectileType<Sentry_SummonTierOne>();
         }
-        public override bool AltFunctionUse(Player player)
-        {
-            return true;
-        }
 
         public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack)
         {
@@ -60,10 +53,6 @@ namespace TF2_Content.Items.Engineer.Summons
             else if (player.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierThree>()] > 0)
             {
                 type = ModContent.ProjectileType<Sentry_SummonTierThree_Buff>();
-            }
-            if (player.altFunctionUse == 2)
-            {
-                type = ModContent.ProjectileType<Sentry_SummonMini>();
             }
             Projectile.NewProjectile(Main.MouseWorld, new Vector2(0, 0), type, item.damage, item.knockBack, player.whoAmI);
             return false;

@@ -3,7 +3,7 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace TF2_Content.Items.Demo
+namespace TF2_Content.Items.Demo.Projectiles
 {
     class Grenade_Pill : ModProjectile
     {
@@ -21,7 +21,7 @@ namespace TF2_Content.Items.Demo
         public override void AI()
         {
             projectile.rotation = projectile.timeLeft/4;
-            projectile.velocity.Y += 0.1f;
+            projectile.velocity.Y += 0.25f;
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity)

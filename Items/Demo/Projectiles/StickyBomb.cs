@@ -1,38 +1,42 @@
-﻿using System;
-using Terraria.ModLoader;
+﻿using Terraria.ModLoader;
 using Terraria;
 using Terraria.ID;
-using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
-namespace TF2_Content.Items.Engineer.Summons
+namespace TF2_Content.Items.Demo.Projectiles
 {
-    class Sentry_Missile : ModProjectile
+    class StickyBomb : ModProjectile
     {
-        public override void SetStaticDefaults()
-        {
-            DisplayName.SetDefault("Sentry Missile");
-        }
         public override void SetDefaults()
         {
-            projectile.width = 8;
-            projectile.height = 8;
+            projectile.width = 16;
+            projectile.height = 16;
+            projectile.scale = 0.5f;
+            projectile.timeLeft = int.MaxValue;
             projectile.friendly = true;
-            projectile.penetrate = 1;
-            projectile.timeLeft = 123;
-
-            drawOffsetX = -20;
-            drawOriginOffsetY = -6;
+            drawOffsetX = -12;
+            drawOriginOffsetY = -12;
         }
 
-        int timer = 5;
+        bool rotate = true;
+        int rotation = 360;
+        float gravity = 0.5f;
 
         public override void AI()
         {
-            projectile.rotation = projectile.velocity.ToRotation();
-            if (projectile.owner == Main.myPlayer && projectile.timeLeft <= 3)
+            projectile.velocity.Y += gravity;
+            if (rotate == true)
+            {
+                projectile.rotation = rotation;
+            }
+            rotation--;
+            Player player = Main.player[projectile.owner]; 
+            if (Main.mouseRight && player.whoAmI == Main.myPlayer)
+            {
+                projectile.timeLeft = 1;
+            }
+
+            if(projectile.timeLeft <= 1)
             {
                 projectile.tileCollide = false;
                 projectile.alpha = 255;
@@ -41,21 +45,14 @@ namespace TF2_Content.Items.Engineer.Summons
                 projectile.height = 250;
                 projectile.Center = projectile.position;
             }
-            else if (timer-- <= 0)
-            {
-                Dust.NewDustPerfect(projectile.Center, DustID.Smoke, projectile.velocity / 8 * -1, 0, Color.White, 1);
-                Dust.NewDustPerfect(projectile.Center, DustID.Fire, projectile.velocity / 8 * -1, 0, Color.White, 1);
-            }
         }
 
-        public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
+        public override bool OnTileCollide(Vector2 oldVelocity)
         {
-            projectile.tileCollide = false;
-            projectile.alpha = 255;
-            projectile.position = projectile.Center;
-            projectile.width = 250;
-            projectile.height = 250;
-            projectile.Center = projectile.position;
+            projectile.velocity *= 0;
+            rotate = false;
+            gravity = 0;
+            return false;
         }
 
         public override void Kill(int timeLeft)
