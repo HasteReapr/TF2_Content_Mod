@@ -1,4 +1,9 @@
 Terraria Fortress 2 is a mod inspired by Team Fortress 2 and is intended to add at the very least all of the TF2 stock weapons.
 
-Version 1.0 adds stock weapons for every class.
-Some point within a week of this release date, I'll release 1.1 which fixes the medigun and adds actual sprites for the melee weapons.
+
+-- Official Discord Server Link --
+   https://discord.gg/gy9GTzyE
+
+
+Version 1.1 updates the placeholder sprites for all melee weapons,
+and fixes the medigun.

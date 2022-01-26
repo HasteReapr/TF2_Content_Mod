@@ -5,24 +5,44 @@ using Terraria.ID;
 
 namespace TF2_Content.Items.Medic
 {
-	class Medigun : ModItem
-	{
-		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("Medigun");
-			Tooltip.SetDefault("Medic's finest achievment");
-		}
+    class Medigun : Mediguns
+    {
+        public override void SetStaticDefaults()
+        {
+            DisplayName.SetDefault("Medigun");
+            Tooltip.SetDefault("Medic's finest achievment");
+        }
 
-		public override void SetDefaults()
-		{
-			item.CloneDefaults(ItemID.LastPrism);
-			item.magic = true;
-			item.mana = 0;
-			item.damage = 25;
-			item.shoot = ModContent.ProjectileType<Medigun_Holdout>();
-			item.shootSpeed = 30f;
-		}
+        public override void SafeSetDefaults()
+        {
+            item.CloneDefaults(ItemID.LastPrism);
+            item.mana = 0;
+            item.damage = 25;
+            item.shoot = ModContent.ProjectileType<Medigun_Holdout>();
+            item.shootSpeed = 30f;
+            UberCost = 100;
+        }
 
-		public override bool CanUseItem(Player player) => player.ownedProjectileCounts[ModContent.ProjectileType<Medigun_Holdout>()] <= 0;
-	}
+        public override bool AltFunctionUse(Player player)
+        {
+            return true;
+        }
+
+        public override bool CanUseItem(Player player)
+        {
+            if (player.altFunctionUse == 2 && player.GetModPlayer<MedicPlayer>().CurrentUber == UberCost)
+            {
+                player.AddBuff(ModContent.BuffType<Buffs.Ubercharge>(), 60*8);
+                return true;
+            }
+            else if (player.ownedProjectileCounts[ModContent.ProjectileType<Medigun_Holdout>()] <= 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 }

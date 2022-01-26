@@ -98,6 +98,7 @@ namespace TF2_Content.Items.Medic
 
 		private void FireBeams()
 		{
+			Player player = Main.player[projectile.owner];
 			Vector2 beamVelocity = Vector2.Normalize(projectile.velocity);
 			if (beamVelocity.HasNaNs())
 			{
@@ -108,11 +109,10 @@ namespace TF2_Content.Items.Medic
 
 			int damage = projectile.damage;
 			float knockback = projectile.knockBack;
-			for (int b = 0; b < 1; ++b)
+            if (player.ownedProjectileCounts[ModContent.ProjectileType<Medigun_Projectile>()] == 0)
 			{
-				Projectile.NewProjectile(projectile.Center, beamVelocity, ModContent.ProjectileType<Medigun_Projectile>(), damage, knockback, projectile.owner, b, uuid);
+				Projectile.NewProjectile(projectile.Center, Vector2.Zero, ModContent.ProjectileType<Medigun_Projectile>(), damage, knockback, projectile.owner, 0, uuid);
 			}
-
 			projectile.netUpdate = true;
 		}
 

@@ -46,12 +46,9 @@ namespace TF2_Content.Items.Heavy
 
         public override bool UseItem(Player player)
         {
-            if(player.whoAmI == Main.myPlayer)
-            {
-                player.moveSpeed *= 0.25f;
-                player.maxRunSpeed *= 0.25f;
-                player.accRunSpeed *= 0.1f;
-            }
+            player.moveSpeed *= 0.25f;
+            player.maxRunSpeed *= 0.25f;
+            player.accRunSpeed *= 0.1f;
             return true;
         }
     }

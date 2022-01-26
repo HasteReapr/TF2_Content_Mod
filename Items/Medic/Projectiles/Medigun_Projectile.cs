@@ -8,6 +8,7 @@ using Terraria.GameContent.Shaders;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
+using TF2_Content.Buffs;
 
 namespace TF2_Content.Items.Medic.Projectiles
 {
@@ -21,7 +22,30 @@ namespace TF2_Content.Items.Medic.Projectiles
             projectile.friendly = true;
         }
 
-        private const float MOVE_DISTANCE = 60f;
+        public override void OnHitPlayer(Player target, int damage, bool crit)
+        {
+            if (target.active && target.team == Main.player[projectile.owner].team && Main.player[projectile.owner].team != 0)
+            {
+                target.statLife += projectile.damage / 60;
+                if (!Main.player[projectile.owner].HasBuff(ModContent.BuffType<Ubercharge>()))
+                    Main.player[projectile.owner].GetModPlayer<MedicPlayer>().CurrentUber += 0.02f;
+            }
+        }
+
+        public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
+        {
+            //purely for debugging in singleplayer
+            target.life += projectile.damage / 60;
+            if (!Main.player[projectile.owner].HasBuff(ModContent.BuffType<Ubercharge>()))
+                Main.player[projectile.owner].GetModPlayer<MedicPlayer>().CurrentUber += 1f;
+        }
+
+        /*public override bool? CanHitNPC(NPC target)
+        {
+            return false;
+        }*/
+
+        private const float MOVE_DISTANCE = 30;
 
         public float Distance
         {
@@ -32,7 +56,7 @@ namespace TF2_Content.Items.Medic.Projectiles
         public override bool PreDraw(SpriteBatch spriteBatch, Color lightColor)
         {
             DrawLaser(spriteBatch, Main.projectileTexture[projectile.type], Main.player[projectile.owner].Center,
-                projectile.velocity, 10, projectile.damage, -1.57f, 1f, 1000f, Color.White, (int)MOVE_DISTANCE);
+                projectile.velocity, 10, projectile.damage, -1.57f, 1f, 50, Color.White, (int)MOVE_DISTANCE);
             return false;
         }
 
@@ -81,12 +105,30 @@ namespace TF2_Content.Items.Medic.Projectiles
 
             SetLaserPosition(player);
             UpdatePlayer(player);
-            CastLights();
+            //stopOnCursor();
+        }
+
+        private void healPlayer()
+        {
+            Rectangle beamHitBox = new Rectangle();
+            beamHitBox.X = projectile.width;
+            beamHitBox.Y = projectile.height;
+            
+        }
+
+        private void stopOnCursor()
+        {
+            //somehow figure out when the lazer has hit the mouse and stop drawing
+            if(projectile.owner == Main.myPlayer)
+            {
+                Distance = Main.MouseWorld.X;
+            }
         }
 
         private void SetLaserPosition(Player player)
         {
-            for (Distance = MOVE_DISTANCE; Distance <= 2200f; Distance += 5f)
+            if (Main.myPlayer == projectile.owner)
+            for (Distance = MOVE_DISTANCE; Distance <= Main.MouseWorld.X; Distance += 5f)
             {
                 var start = player.Center + projectile.velocity * Distance;
                 if (!Collision.CanHit(player.Center, 1, 1, start, 1, 1))
@@ -115,13 +157,6 @@ namespace TF2_Content.Items.Medic.Projectiles
             player.itemTime = 2; // Set item time to 2 frames while we are used
             player.itemAnimation = 2; // Set item animation time to 2 frames while we are used
             player.itemRotation = (float)Math.Atan2(projectile.velocity.Y * dir, projectile.velocity.X * dir); // Set the item rotation to where we are shooting
-        }
-
-        private void CastLights()
-        {
-            // Cast a light along the line of the laser
-            DelegateMethods.v3_1 = new Vector3(0.8f, 0.8f, 1f);
-            Utils.PlotTileLine(projectile.Center, projectile.Center + projectile.velocity * (Distance - MOVE_DISTANCE), 26, DelegateMethods.CastLight);
         }
     }
 }

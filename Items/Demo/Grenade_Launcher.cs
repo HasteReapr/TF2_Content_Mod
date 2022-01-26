@@ -2,6 +2,7 @@
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using TF2_Content.Items.Demo.Projectiles;
+using Terraria;
 
 namespace TF2_Content.Items.Demo
 {
@@ -22,7 +23,14 @@ namespace TF2_Content.Items.Demo
             item.useTime = 20;
             item.useAnimation = 20;
             item.autoReuse = true;
+            item.UseSound = SoundID.Item111;
         }
+
+        /*public override bool UseItem(Player player)
+        {
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "TF2_Content/Sounds/Custom/Grenade_launcher_shoot");
+            return true;
+        }*/
 
         public override Vector2? HoldoutOffset()
         {
