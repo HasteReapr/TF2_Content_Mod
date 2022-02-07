@@ -24,6 +24,7 @@ namespace TF2_Content.Items.Soldier
             item.useStyle = ItemUseStyleID.HoldingOut;
             item.knockBack = 5f;
             item.autoReuse = false;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/rocket_shoot");
         }
 
         public override Vector2? HoldoutOffset()

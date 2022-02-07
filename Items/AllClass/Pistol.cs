@@ -22,6 +22,7 @@ namespace TF2_Content.Items.AllClass
             item.damage = 50;
             item.autoReuse = true;
             item.useStyle = ItemUseStyleID.HoldingOut;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/pistol_shoot");
         }
 
         public override Vector2? HoldoutOffset()

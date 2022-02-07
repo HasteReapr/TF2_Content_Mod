@@ -3,9 +3,8 @@ using Terraria.ID;
 
 namespace TF2_Content.Items.Pyro
 {
-    class Fireace : ModItem
+    class Fireaxe : ModItem
     {
-        public override string Texture => "TF2_Content/Items/Placeholder";
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Fireaxe");

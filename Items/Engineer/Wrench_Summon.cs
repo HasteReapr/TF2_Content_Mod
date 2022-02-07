@@ -30,7 +30,7 @@ namespace TF2_Content.Items.Engineer
             item.useStyle = ItemUseStyleID.SwingThrow;
             item.value = Item.sellPrice(gold: 30);
             item.rare = ItemRarityID.Cyan;
-            item.UseSound = SoundID.Item44;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/wrench_swing");
             item.knockBack = 10f;
 
             item.noMelee = true;

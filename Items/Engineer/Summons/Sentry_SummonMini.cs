@@ -176,7 +176,7 @@ namespace TF2_Content.Items.Engineer.Summons
             if (shotTimer <= 0)
             {
                 Projectile.NewProjectile(projectile.Center, direction * speed, ModContent.ProjectileType<Sentry_Bullet>(), 150, projectile.knockBack, projectile.owner);
-                Main.PlaySound(SoundID.Item11, projectile.Center);
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/sentry_shoot_mini"), projectile.Center);
                 shotTimer = 15;
             }
         }

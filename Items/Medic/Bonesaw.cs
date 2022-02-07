@@ -5,7 +5,6 @@ namespace TF2_Content.Items.Medic
 {
     class Bonesaw : ModItem
     {
-        public override string Texture => "TF2_Content/Items/Placeholder";
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Bonesaw");

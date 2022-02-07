@@ -4,7 +4,7 @@ namespace TF2_Content.Items.Soldier
 {
     class Shovel : ModItem
     {
-        public override string Texture => "TF2_Content/Items/Placeholder"; public override void SetStaticDefaults()
+        public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Shovel");
         }

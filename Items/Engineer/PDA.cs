@@ -9,7 +9,6 @@ namespace TF2_Content.Items.Engineer
 {
     class PDA : ModItem
     {
-        public override string Texture => "TF2_Content/Items/Placeholder";
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Engineer's PDA");
@@ -19,6 +18,8 @@ namespace TF2_Content.Items.Engineer
         int[] PDAShoot =
         {
             ModContent.ProjectileType<Dispenser_Summon>(),
+            ModContent.ProjectileType<Teleporter_Summon>(),
+            ModContent.ProjectileType<TeleporterExit_Summon>()
         };
 
         public override void SetDefaults()
@@ -30,20 +31,6 @@ namespace TF2_Content.Items.Engineer
             item.knockBack = 0;
         }
 
-        public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack)
-        {
-            type = PDAShoot[Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit];
-            if(Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Dispenser_Summon>()] > 0 && Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit == 0)
-            {
-                Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI, 1);
-            }
-            else
-            {
-                Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI);
-            }
-            return false;
-        }
-
         public override bool AltFunctionUse(Player player)
         {
             return true;
@@ -51,7 +38,7 @@ namespace TF2_Content.Items.Engineer
 
         public override bool UseItem(Player player)
         {
-            if(player.altFunctionUse == 2)
+            if (player.altFunctionUse == 2)
             {
                 PDAUI.Visible = !PDAUI.Visible;
                 item.shoot = ProjectileID.PurificationPowder;
@@ -62,6 +49,34 @@ namespace TF2_Content.Items.Engineer
                 item.useStyle = ItemUseStyleID.SwingThrow;
             }
             return true;
+        }
+        public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack)
+        {
+            type = PDAShoot[Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit];
+            if(player.altFunctionUse == 2)
+            {
+                PDAUI.Visible = !PDAUI.Visible;
+            }
+            else
+            {
+                if (Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Dispenser_Summon>()] > 0 && Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit == 0)
+                {
+                    Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI, 1);
+                }
+                else if (Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Teleporter_Summon>()] > 0 && Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit == 1)
+                {
+                    Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI, 1);
+                }
+                else if (Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<TeleporterExit_Summon>()] > 0 && Main.LocalPlayer.GetModPlayer<TF2_Player>().DispTeleExit == 2)
+                {
+                    Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI, 1);
+                }
+                else
+                {
+                    Projectile.NewProjectile(Main.MouseWorld, Vector2.Zero, type, item.damage, item.knockBack, player.whoAmI);
+                }
+            }
+            return false;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace TF2_Content.Items.Demo
             item.useTime = 30;
             item.useAnimation = 30;
             item.autoReuse = true;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/stickybomb_shoot");
         }
     }
 }

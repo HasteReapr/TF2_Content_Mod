@@ -23,7 +23,7 @@ namespace TF2_Content.Items.Heavy
             item.useAmmo = AmmoID.Bullet;
             item.shootSpeed = 24;
             item.autoReuse = true;
-            item.UseSound = SoundID.Item11;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/minigun_shoot");
         }
 
         public override Vector2? HoldoutOffset()

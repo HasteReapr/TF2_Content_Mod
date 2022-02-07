@@ -164,7 +164,7 @@ namespace TF2_Content.UI
         public override void Update(GameTime gameTime)
         {
             DispText.SetText($"Dispenser {Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Dispenser_Summon>()]}/1");
-            TeleText.SetText($"Teleporter {Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Sentry_SummonTierOne>()]}/2");
+            TeleText.SetText($"Teleporter {Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<Teleporter_Summon>()] + Main.LocalPlayer.ownedProjectileCounts[ModContent.ProjectileType<TeleporterExit_Summon>()]}/2");
         }
     }
 }

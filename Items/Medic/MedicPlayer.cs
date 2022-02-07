@@ -20,11 +20,6 @@ namespace TF2_Content.Items.Medic
 		internal int UberChargeTimer = 0;
 		public static readonly Color HealExampleResource = new Color(187, 91, 201);
 
-		public override void ResetEffects()
-		{
-			ResetVariables();
-		}
-
 		public override void UpdateDead()
 		{
 			ResetVariables();
@@ -35,6 +30,7 @@ namespace TF2_Content.Items.Medic
 			HealRateAdd = 0;
 			HealRateMult = 1f;
 			UberChargeRate = 1f;
+			CurrentUber = 0;
 		}
 
 		public override void PostUpdateMiscEffects()
@@ -44,14 +40,6 @@ namespace TF2_Content.Items.Medic
 
 		private void UpdateResource()
 		{
-			/*UberChargeTimer++;
-
-			if (UberChargeTimer > 60 * UberChargeRate)
-			{
-				CurrentUber += 0.04f;
-				UberChargeTimer = 0;
-			}*/
-
 			CurrentUber = Utils.Clamp(CurrentUber, 0, UberChargeMax);
 		}
 	}

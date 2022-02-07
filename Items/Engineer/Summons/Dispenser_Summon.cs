@@ -20,7 +20,7 @@ namespace TF2_Content.Items.Engineer.Summons
 
         public override void OnHitPlayer(Player target, int damage, bool crit)
         {
-            if(target == Main.player[projectile.owner])
+            if (target == Main.player[projectile.owner])
             {
                 target.statLife += HealRate / 60;
             }
@@ -44,13 +44,13 @@ namespace TF2_Content.Items.Engineer.Summons
             if (dispenserHitPoints < maxHitPoints || healthBarTimer >= 0)
             {
                 float quotient = (float)dispenserHitPoints / maxHitPoints;
-                spriteBatch.Draw(HealthTexture, projectile.Center + new Vector2(-22, 50) - Main.screenPosition, Color.White);
+                spriteBatch.Draw(HealthTexture, projectile.Center + new Vector2(-22, 32) - Main.screenPosition, Color.White);
                 quotient = Utils.Clamp(quotient, 0f, 1f);
 
                 Rectangle hitbox = new Rectangle();
                 hitbox.X = (int)projectile.Center.X - 20 - (int)Main.screenPosition.X;
                 hitbox.Width = 46;
-                hitbox.Y = (int)projectile.Center.Y + 53 - (int)Main.screenPosition.Y;
+                hitbox.Y = (int)projectile.Center.Y + 34 - (int)Main.screenPosition.Y;
                 hitbox.Height = 6;
 
                 int left = hitbox.Left;
@@ -84,9 +84,14 @@ namespace TF2_Content.Items.Engineer.Summons
                 return false;
             }
         }
-
+        int timeer = 0;
+        int playerHealTimer = 60;
         public override void AI()
         {
+            timeer++;
+            if (projectile.ai[0] == 1 && timeer >= 5)
+                projectile.ai[0] = 0;
+
             if (Collision.SolidCollision(projectile.position, projectile.width, projectile.height))
             {
                 projectile.velocity = Vector2.Zero;
@@ -101,7 +106,7 @@ namespace TF2_Content.Items.Engineer.Summons
             if (player.active)
                 projectile.timeLeft = 2;
 
-            if(projectile.ai[0] == 1)
+            if (projectile.ai[0] == 0 && Main.player[projectile.owner].ownedProjectileCounts[ModContent.ProjectileType<Dispenser_Summon>()] > 1)
             {
                 projectile.Kill();
             }
@@ -109,6 +114,11 @@ namespace TF2_Content.Items.Engineer.Summons
             //just a simple check to see if the projectile owner is alive.
 
             healDispenser();
+            if(--playerHealTimer <= 0)
+            {
+                HealPlayers();
+                playerHealTimer = 30;
+            }
         }
 
         private void healDispenser()
@@ -133,14 +143,21 @@ namespace TF2_Content.Items.Engineer.Summons
                 healTimer = 30;
                 healthBarTimer--;
             }
-            if (invulnFrames > 0)
+            if (invulnFrames >= 0)
                 invulnFrames--;
         }
 
         private void HealPlayers()
         {
-            // do something here that would check if any player is in within a radius, then heal them.
-            // possibly drawing a beam to the player
+            Player player = Main.player[projectile.owner];
+            for (int x = 0; x < Main.maxPlayers; x++)
+            {
+                if (((Main.player[x].active && Main.player[x].Hitbox.Intersects(projectile.Hitbox) && Main.player[x].team == player.team && player.team != 0) || Main.player[x] == player && Main.player[x].Hitbox.Intersects(projectile.Hitbox)) && Main.player[x].statLife < Main.player[x].statLifeMax2)
+                {
+                    Main.player[x].statLife += 3;
+                    Main.player[x].HealEffect(3);
+                }
+            }
         }
     }
 }

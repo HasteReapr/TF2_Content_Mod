@@ -29,7 +29,8 @@ namespace TF2_Content
                 Ref<Effect> UberRef = new Ref<Effect>(GetEffect("Effects/UberShader")); //Path to the effect
                 GameShaders.Armor.BindShader(ModContent.ItemType<UberDye>(), new ArmorShaderData(UberRef, "Ubercharged"));
                 //Item the dye is binded too                        The ref     The pass name
-                Filters.Scene["UberGlow"] = new Filter(new ScreenShaderData(UberRef, "Uberscreen"), EffectPriority.Medium);
+                Filters.Scene["UberGlow"] = new Filter(new ScreenShaderData(UberRef, "Uberscreen"), EffectPriority.VeryHigh);
+                Filters.Scene["UberGlow"].Load();
             }
             if (!Main.dedServ)
             {

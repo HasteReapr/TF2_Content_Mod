@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -23,6 +24,7 @@ namespace TF2_Content.Items.Medic
             item.shoot = ModContent.ProjectileType<Syringe>();
             item.shootSpeed = 24;
             item.autoReuse = true;
+            item.UseSound = item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/syringe_gun_shoot");
         }
 
         public override Vector2? HoldoutOffset()
@@ -31,17 +33,22 @@ namespace TF2_Content.Items.Medic
         }
 
         int shotsLeft = 125;
+        bool reloading = false;
 
         public override void HoldItem(Player player)
         {
             if(shotsLeft >= 125)
             {
                 shotsLeft = 125;
+                reloading = false;
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/syringegun_reload"));
             }
+
             if(shotsLeft <= 0)
-            {
+                reloading = true;
+
+            if (reloading)
                 shotsLeft++;
-            }
         }
 
         public override bool Shoot(Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack)
@@ -50,20 +57,15 @@ namespace TF2_Content.Items.Medic
             Vector2 perturbedSpeed = new Vector2(speedX, speedY).RotatedByRandom(MathHelper.ToRadians(10));
             speedX = perturbedSpeed.X;
             speedY = perturbedSpeed.Y;
-            //Main.NewText($"{shotsLeft}");
             return true;
         }
 
         public override bool CanUseItem(Player player)
         {
-            if(shotsLeft <= 0)
-            {
+            if(reloading)
                 return false;
-            }
             else
-            {
                 return true;
-            }
         }
     }
 }

@@ -23,14 +23,8 @@ namespace TF2_Content.Items.Demo
             item.useTime = 20;
             item.useAnimation = 20;
             item.autoReuse = true;
-            item.UseSound = SoundID.Item111;
+            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Grenade_launcher_shoot");
         }
-
-        /*public override bool UseItem(Player player)
-        {
-            item.UseSound = mod.GetLegacySoundSlot(SoundType.Custom, "TF2_Content/Sounds/Custom/Grenade_launcher_shoot");
-            return true;
-        }*/
 
         public override Vector2? HoldoutOffset()
         {

@@ -23,7 +23,6 @@ namespace TF2_Content.Items.Engineer.Summons
             ProjectileID.Sets.Homing[projectile.type] = true;
         }
 
-        float distanceFromTarget;
         bool foundTarget;
         Vector2 targetCenter;
 
@@ -170,6 +169,10 @@ namespace TF2_Content.Items.Engineer.Summons
             {
                 Shoot();
             }
+            else
+            {
+                return;
+            }
         }
 
         private void healSentry()
@@ -219,6 +222,8 @@ namespace TF2_Content.Items.Engineer.Summons
             float speed = 32;
             direction.Normalize();
             projectile.rotation = direction.ToRotation() + (projectile.spriteDirection == 1 ? 0f : MathHelper.Pi);
+
+            //this part is supposed to make sure the sentry gun head sprite works properly
             if (targetCenter.X < projectile.Center.X)
             {
                 projectile.spriteDirection = -1;
@@ -229,6 +234,9 @@ namespace TF2_Content.Items.Engineer.Summons
                 projectile.spriteDirection = 1;
                 drawOffsetX = 0;
             }
+
+            //this bit is for the inventory slots in the sentry gun, it checks if anything in is the slot and if it does it shoots the
+            //bullet in the slot
             if (!bulletSlot1.IsAir)
             {
                 ProjType = bulletSlot1;
@@ -247,20 +255,23 @@ namespace TF2_Content.Items.Engineer.Summons
             }
             else
             {
+                //this just shoots the default projectile type 
                 if (shotTimer <= 0 && spawnAmmo > 0)
                 {
                     Projectile.NewProjectile(projectile.Center, direction * speed, DefaultProjType, 300, projectile.knockBack, projectile.owner);
-                    Main.PlaySound(SoundID.Item11, projectile.Center);
+                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/sentry_shoot"), projectile.Center);
                     spawnAmmo--;
                     shotTimer = 15;
                 }
                 else if (shotTimer <= 0)
                 {
-                    Main.PlaySound(SoundID.Item11, projectile.Center);
+                    Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/sentry_empty"), projectile.Center);
                     shotTimer = 15;
                 }
             }
 
+
+            // this shoots the thing in the slot
             if (shotTimer <= 0)
             {
                 if (ProjType.type == ItemID.MusketBall || ProjType.type == ItemID.EndlessMusketPouch)
@@ -271,7 +282,7 @@ namespace TF2_Content.Items.Engineer.Summons
                 {
                     Projectile.NewProjectile(projectile.Center, direction * speed, ProjType.shoot, 300, projectile.knockBack, projectile.owner);
                 }
-                Main.PlaySound(SoundID.Item11, projectile.Center);
+                Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/sentry_shoot"), projectile.Center);
                 if (ProjType.type != ItemID.EndlessMusketPouch)
                 {
                     ProjType.stack--;
@@ -290,43 +301,34 @@ namespace TF2_Content.Items.Engineer.Summons
         private void SearchForTargets()
         {
             var owner = Main.player[projectile.owner];
-            distanceFromTarget = 32;
             targetCenter = projectile.position;
             foundTarget = false;
-            if (owner.HasMinionAttackTargetNPC)
-            {
-                NPC npc = Main.npc[owner.MinionAttackTargetNPC];
-                float between = Vector2.Distance(npc.Center, projectile.Center);
-
-                if (between < 32)
-                {
-                    distanceFromTarget = between;
-                    targetCenter = npc.Center;
-                    foundTarget = true;
-                }
-            }
 
             if (!foundTarget)
             {
                 for (int i = 0; i < Main.maxNPCs; i++)
                 {
                     NPC npc = Main.npc[i];
-
                     if (npc.CanBeChasedBy())
                     {
+                        float npcDistance = Vector2.Distance(npc.Center, projectile.Center);
+                        bool closest = Vector2.Distance(projectile.Center, targetCenter) > npcDistance;
                         float between = Vector2.Distance(npc.Center, projectile.Center);
-                        bool closest = Vector2.Distance(projectile.Center, targetCenter) > between;
-                        bool inRange = between < distanceFromTarget;
-                        bool lineOfSight = Collision.CanHitLine(projectile.position, projectile.width, projectile.height, npc.position, npc.width, npc.height);
-                        bool closeThroughWall = between < 100f;
 
-                        if (((closest && inRange) || !foundTarget) && (lineOfSight || closeThroughWall))
+                        if (closest || !foundTarget)
                         {
-                            // somehow fix the sound playing over and over again
-                            //Main.PlaySound(mod.GetLegacySoundSlot(SoundType.Custom, "Sounds/Custom/Sentry_Spot"));
-                            distanceFromTarget = between;
-                            targetCenter = npc.Center;
-                            foundTarget = true;
+                            bool closeThroughWall = npcDistance < 100f;
+                            bool lineOfSight = Collision.CanHitLine(projectile.position, projectile.width, projectile.height, npc.position, npc.width, npc.height);
+
+                            if ((lineOfSight || closeThroughWall) && between < 1280)
+                            {
+                                targetCenter = npc.Center;
+                                foundTarget = true;
+                            }
+                            else if (between > 1600)
+                            {
+                                foundTarget = false;
+                            }
                         }
                     }
                 }

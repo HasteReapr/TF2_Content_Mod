@@ -17,7 +17,7 @@ namespace TF2_Content.Items.Medic
         {
             item.CloneDefaults(ItemID.LastPrism);
             item.mana = 0;
-            item.damage = 25;
+            item.damage = 5;
             item.shoot = ModContent.ProjectileType<Medigun_Holdout>();
             item.shootSpeed = 30f;
             UberCost = 100;

@@ -11,13 +11,7 @@ namespace TF2_Content.Items.Medic
 	{
 		public override string Texture => "TF2_Content/Items/Medic/Medigun";
 
-		public const float MaxCharge = 180f;
-		
-		public const float DamageStart = 30f;
-
-		private const float AimResponsiveness = 0.25f;
-
-		private const int SoundInterval = 20;
+		private const float AimResponsiveness = 1;
 
 		public override void SetStaticDefaults()
 		{
