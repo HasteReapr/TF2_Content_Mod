@@ -2,7 +2,6 @@ Terraria Fortress 2 is a mod inspired by Team Fortress 2 and is intended to add 
 
 
 -- Official Discord Server Link --
-   https://discord.gg/gy9GTzyE
+   https://discord.gg/xpP6AgxWYG
 
-
-Version 1.01 updates the placeholder sprites for all melee weapons, and fixes the medigun.
+Version 1.02 brings minor bug fixes, adds airblast and fixes the discord link.

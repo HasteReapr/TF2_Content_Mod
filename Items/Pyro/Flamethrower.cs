@@ -1,10 +1,11 @@
 ﻿using Terraria.ModLoader;
 using Terraria.ID;
 using Microsoft.Xna.Framework;
+using Terraria;
 
 namespace TF2_Content.Items.Pyro
 {
-    class Flamethrower : ModItem
+    class Flamethrower : Flamethrowers
     {
         public override void SetStaticDefaults()
         {
@@ -12,15 +13,9 @@ namespace TF2_Content.Items.Pyro
             Tooltip.SetDefault("\"Hudda hudda huh!\"");
         }
 
-        public override void SetDefaults()
+        public override void SafeSetDefaults()
         {
-            item.CloneDefaults(ItemID.Flamethrower);
-            item.damage = 100;
-        }
-
-        public override Vector2? HoldoutOffset()
-        {
-            return new Vector2(-10, 0);
+            item.damage = 300;
         }
     }
 }

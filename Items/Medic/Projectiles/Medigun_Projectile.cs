@@ -233,8 +233,11 @@ namespace TF2_Content.Items.Medic.Projectiles
 
 						//this check makes sure the player doesnt gain any of the ubercharge counter while they have the ubercharge,
 						//to prevent an infinite uber exploit.
+						// the else statement gives the patient the ubercharged buff when the projectile owner has it, so you can transfer the buff
 						if (!Main.player[projectile.owner].HasBuff(ModContent.BuffType<Ubercharge>()))
 							Main.player[projectile.owner].GetModPlayer<MedicPlayer>().CurrentUber += 0.0833333333333333f;
+						else
+							Main.player[x].AddBuff(ModContent.BuffType<Ubercharge>(), 30);
 
 					}
 				}

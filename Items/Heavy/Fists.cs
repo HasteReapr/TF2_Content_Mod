@@ -18,6 +18,7 @@ namespace TF2_Content.Items.Heavy
             item.damage = 150;
             item.useAnimation = 24;
             item.knockBack = 4.5f;
+            item.noUseGraphic = true;
 
             item.useTime = 24;
             item.shoot = ModContent.ProjectileType<Projectiles.FistsProjectile>(); // this is just the hitbox for the item.

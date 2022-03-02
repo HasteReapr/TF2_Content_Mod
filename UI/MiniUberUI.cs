@@ -8,19 +8,20 @@ using TF2_Content.Items.Medic;
 
 namespace TF2_Content.UI
 {
-	internal class UberchargeBeamUI : UIState
+	internal class MiniUberUI : UIState
 	{
 		private UIText text;
 		private UIElement area;
 		private UIImage barFrame;
 		private Color gradientA;
 		private Color gradientB;
+		public static bool canShow;
 
 		public override void OnInitialize()
 		{
 			area = new UIElement();
-			area.Left.Set(-area.Width.Pixels - 600, 1f);
-			area.Top.Set(30, 0f);
+			Left.Set(10, 0f);
+			Top.Set(10, 0f);
 			area.Width.Set(124, 0f);
 			area.Height.Set(60, 0f);
 
@@ -33,7 +34,7 @@ namespace TF2_Content.UI
 			text = new UIText("0/0", 0.8f);
 			text.Width.Set(124, 0f);
 			text.Height.Set(20, 0f);
-			text.Top.Set(20, 0f);
+			text.Top.Set(25, 0f);
 			text.Left.Set(0, 0f);
 
 			gradientA = new Color(76, 0, 0);
@@ -46,7 +47,7 @@ namespace TF2_Content.UI
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{
-			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || MiniUberUI.canShow)
+			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || !canShow)
 				return;
 
 			base.Draw(spriteBatch);
@@ -57,7 +58,7 @@ namespace TF2_Content.UI
 			base.DrawSelf(spriteBatch);
 
 			var modPlayer = Main.LocalPlayer.GetModPlayer<MedicPlayer>();
-			float quotient = (float)modPlayer.CurrentUber / 100;
+			float quotient = modPlayer.CurrentUber / 100;
 			quotient = Utils.Clamp(quotient, 0f, 1f);
 
 			Rectangle hitbox = barFrame.GetInnerDimensions().ToRectangle();
@@ -77,12 +78,15 @@ namespace TF2_Content.UI
 		}
 		public override void Update(GameTime gameTime)
 		{
-			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || MiniUberUI.canShow)
+			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || !canShow)
 				return;
 
 			var modPlayer = Main.LocalPlayer.GetModPlayer<MedicPlayer>();
 			text.SetText($"Ubercharge: {(int)modPlayer.CurrentUber} / 100");
-			base.Update(gameTime);
+
+			area.Left.Set(Main.mouseX - 10, 0f);
+			area.Top.Set(Main.mouseY - 10, 0f);
+			area.Recalculate();
 		}
 	}
 }

@@ -17,8 +17,19 @@ namespace TF2_Content
     {
         internal SentryUI SentryUI;
         private UserInterface _UserInterface;
+
         internal UberchargeBeamUI UberchargeBeamUI;
         private UserInterface _UberBar;
+
+        internal MiniUberUI miniUberUI;
+        private UserInterface _MiniUberBar;
+
+        internal PhlogChargeUI PhlogChargeUI;
+        private UserInterface _PhlogCharge;
+
+        internal MiniPhlogUI miniPhlogUI;
+        private UserInterface _miniPhlog;
+
         internal PDAUI PDAUI;
         private UserInterface _PDAUI;
 
@@ -32,6 +43,7 @@ namespace TF2_Content
                 Filters.Scene["UberGlow"] = new Filter(new ScreenShaderData(UberRef, "Uberscreen"), EffectPriority.VeryHigh);
                 Filters.Scene["UberGlow"].Load();
             }
+
             if (!Main.dedServ)
             {
                 SentryUI = new SentryUI();
@@ -43,6 +55,21 @@ namespace TF2_Content
                 UberchargeBeamUI.Activate();
                 _UberBar = new UserInterface();
                 _UberBar.SetState(UberchargeBeamUI);
+
+                miniUberUI = new MiniUberUI();
+                miniUberUI.Activate();
+                _MiniUberBar = new UserInterface();
+                _MiniUberBar.SetState(miniUberUI);
+
+                PhlogChargeUI = new PhlogChargeUI();
+                PhlogChargeUI.Activate();
+                _PhlogCharge = new UserInterface();
+                _PhlogCharge.SetState(PhlogChargeUI);
+
+                miniPhlogUI = new MiniPhlogUI();
+                miniPhlogUI.Activate();
+                _miniPhlog = new UserInterface();
+                _miniPhlog.SetState(miniPhlogUI);
 
                 PDAUI = new PDAUI();
                 PDAUI.Activate();
@@ -69,6 +96,9 @@ namespace TF2_Content
                 SentryUI.Visible = false;
             }
             _UberBar?.Update(gameTime);
+            _MiniUberBar?.Update(gameTime);
+            _PhlogCharge?.Update(gameTime);
+            _miniPhlog?.Update(gameTime);
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -115,6 +145,36 @@ namespace TF2_Content
                     },
                     InterfaceScaleType.UI)
                 );
+
+                layers.Insert(resourceBarIndex, new LegacyGameInterfaceLayer(
+                    "TF2_Content: Mini Ubercharge Bar",
+                    delegate
+                    {
+                        _MiniUberBar.Draw(Main.spriteBatch, new GameTime());
+                        return true;
+                    },
+                    InterfaceScaleType.UI)
+                );
+
+                layers.Insert(resourceBarIndex, new LegacyGameInterfaceLayer(
+                   "TF2_Content: Phlogistinator Bar",
+                   delegate
+                   {
+                       _PhlogCharge.Draw(Main.spriteBatch, new GameTime());
+                       return true;
+                   },
+                   InterfaceScaleType.UI)
+               );
+
+                layers.Insert(resourceBarIndex, new LegacyGameInterfaceLayer(
+                   "TF2_Content: Mini Phlogistinator Bar",
+                   delegate
+                   {
+                       _miniPhlog.Draw(Main.spriteBatch, new GameTime());
+                       return true;
+                   },
+                   InterfaceScaleType.UI)
+               );
             }
         }
     }

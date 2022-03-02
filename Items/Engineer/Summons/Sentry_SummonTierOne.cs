@@ -54,7 +54,7 @@ namespace TF2_Content.Items.Engineer.Summons
         int healTimer = 30;
         int healAmount = 50;
         int healthBarTimer = 60;
-        int invulnFrames = 5;
+        int invulnFrames = -30;
         private Color gradientA;
         private Color gradientB;
 
@@ -95,19 +95,13 @@ namespace TF2_Content.Items.Engineer.Summons
         {
             sentryHitPoints -= target.damage;
             healthBarTimer = 60;
-            invulnFrames = 15;
+            if(invulnFrames <= -30)
+                invulnFrames = 15;
         }
 
         public override bool? CanHitNPC(NPC target)
         {
-            if (invulnFrames <= 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return invulnFrames <= 0;
         }
 
         int shotTimer = 15;

@@ -4,12 +4,13 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Terraria.ModLoader;
-using TF2_Content.Items.Medic;
+using TF2_Content.Items.Pyro;
 
 namespace TF2_Content.UI
 {
-	internal class UberchargeBeamUI : UIState
+	internal class MiniPhlogUI : UIState
 	{
+		public static bool canShow = false;
 		private UIText text;
 		private UIElement area;
 		private UIImage barFrame;
@@ -19,12 +20,12 @@ namespace TF2_Content.UI
 		public override void OnInitialize()
 		{
 			area = new UIElement();
-			area.Left.Set(-area.Width.Pixels - 600, 1f);
-			area.Top.Set(30, 0f);
+			area.Left.Set(10, 1f);
+			area.Top.Set(10, 0f);
 			area.Width.Set(124, 0f);
 			area.Height.Set(60, 0f);
 
-			barFrame = new UIImage(ModContent.GetTexture("TF2_Content/UI/UberchargeBeamFrame"));
+			barFrame = new UIImage(ModContent.GetTexture("TF2_Content/UI/PhlogChargeUIBar"));
 			barFrame.Left.Set(0, 0f);
 			barFrame.Top.Set(0, 0f);
 			barFrame.Width.Set(124, 0f);
@@ -34,10 +35,10 @@ namespace TF2_Content.UI
 			text.Width.Set(124, 0f);
 			text.Height.Set(20, 0f);
 			text.Top.Set(20, 0f);
-			text.Left.Set(0, 0f);
+			text.Left.Set(10, 0f);
 
-			gradientA = new Color(76, 0, 0);
-			gradientB = new Color(119, 0, 0);
+			gradientA = new Color(104, 0, 0);
+			gradientB = new Color(93, 0, 0);
 
 			area.Append(text);
 			area.Append(barFrame);
@@ -46,7 +47,7 @@ namespace TF2_Content.UI
 
 		public override void Draw(SpriteBatch spriteBatch)
 		{
-			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || MiniUberUI.canShow)
+			if (!(Main.LocalPlayer.HeldItem.modItem is Phlogistinator) || !canShow)
 				return;
 
 			base.Draw(spriteBatch);
@@ -56,8 +57,8 @@ namespace TF2_Content.UI
 		{
 			base.DrawSelf(spriteBatch);
 
-			var modPlayer = Main.LocalPlayer.GetModPlayer<MedicPlayer>();
-			float quotient = (float)modPlayer.CurrentUber / 100;
+			var modPlayer = Main.LocalPlayer.GetModPlayer<PyroPlayer>();
+			float quotient = (float)modPlayer.PhlogCurrentCharge / 100;
 			quotient = Utils.Clamp(quotient, 0f, 1f);
 
 			Rectangle hitbox = barFrame.GetInnerDimensions().ToRectangle();
@@ -77,12 +78,15 @@ namespace TF2_Content.UI
 		}
 		public override void Update(GameTime gameTime)
 		{
-			if (!(Main.LocalPlayer.HeldItem.modItem is Mediguns) || MiniUberUI.canShow)
+			if (!(Main.LocalPlayer.HeldItem.modItem is Phlogistinator) || !canShow)
 				return;
 
-			var modPlayer = Main.LocalPlayer.GetModPlayer<MedicPlayer>();
-			text.SetText($"Ubercharge: {(int)modPlayer.CurrentUber} / 100");
-			base.Update(gameTime);
+			var modPlayer = Main.LocalPlayer.GetModPlayer<PyroPlayer>();
+			text.SetText($"Phlogistinator Charge: {(int)modPlayer.PhlogCurrentCharge} / 100");
+
+			area.Left.Set(Main.mouseX - 10, 0f);
+			area.Top.Set(Main.mouseY - 10, 0f);
+			area.Recalculate();
 		}
 	}
 }

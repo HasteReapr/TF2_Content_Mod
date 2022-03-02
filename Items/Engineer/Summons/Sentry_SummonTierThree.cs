@@ -100,24 +100,18 @@ namespace TF2_Content.Items.Engineer.Summons
         int inBetweenRocket = 15;
         int rockets = 4;
         int buffAmmount = 0;
-        int invulnFrames = 0;
+        int invulnFrames = -30;
         public override void OnHitNPC(NPC target, int damage, float knockback, bool crit)
         {
             sentryHitPoints -= (int)(target.damage * (buffAmmount * 0.05f));
             healthBarTimer = 60;
-            invulnFrames = 15;
+            if (invulnFrames <= -30)
+                invulnFrames = 15;
         }
 
         public override bool? CanHitNPC(NPC target)
         {
-            if (invulnFrames <= 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return invulnFrames <= 0;
         }
 
 
